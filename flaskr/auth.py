@@ -3,9 +3,9 @@ from flask import (Blueprint, flash, g, redirect, render_template, request, sess
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 
-bp = Blueprint('auth',__name__,url_prefix='/auth')
+bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-bp.route('/register', methods=('GET','POST'))
+@bp.route('/register', methods=('GET', 'POST'))
 def register():
     if request.method == 'POST':
         username = request.form['username']
@@ -14,25 +14,25 @@ def register():
         error = None
 
         if not username:
-            error = 'Username is required'
+            error = 'Username is required.'
         elif not password:
-            error = 'Password is required'
-        
+            error = 'Password is required.'
+
         if error is None:
             try:
                 db.execute(
-                    "INSERT INTO user (username, password) VALUES (?,?)",
-                    (username, generate_password_hash(password))
+                    "INSERT INTO user (username, password) VALUES (?, ?)",
+                    (username, generate_password_hash(password)),
                 )
                 db.commit()
             except db.IntegrityError:
-                error = f"User {username} is already registered"
+                error = f"User {username} is already registered."
             else:
                 return redirect(url_for("auth.login"))
-        
-        flash(error)
-    return render_template("auth/register.html")
 
+        flash(error)
+
+    return render_template('auth/register.html')
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
@@ -59,6 +59,7 @@ def login():
 
     return render_template('auth/login.html')
 
+
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
@@ -67,7 +68,7 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = get_db().execute(
-            'SELECT * FROM user WHERE id = ?',(user_id,)
+            'SELECT * FROM user WHERE id = ?', (user_id,)
         ).fetchone()
 
 
@@ -75,7 +76,6 @@ def load_logged_in_user():
 def logout():
     session.clear()
     return redirect(url_for('index'))
-
 
 def login_required(view):
     @functools.wraps(view)

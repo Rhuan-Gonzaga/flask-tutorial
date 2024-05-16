@@ -32,7 +32,7 @@ def create_app(test_config=None):
      #Sarting DATABASE  
 
     db.init_app(app)
-    
+
     app.register_blueprint(auth.bp)
 
     return app
